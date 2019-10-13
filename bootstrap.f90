@@ -6,6 +6,7 @@ MODULE bootstrap
   IMPLICIT NONE
   PRIVATE
   PUBLIC get_data,monte_carlo_fit_data
+  INTEGER,PARAMETER :: nrand_points=100000 ! No. of samples for bootstrap MC.
   ! Number of data points and number of parameters in model.
   INTEGER :: ndata,nparam
   INTEGER :: nprop ! Number of derived properties
@@ -256,7 +257,6 @@ CONTAINS
     ! statistical error in the fitted parameters.
     IMPLICIT NONE
     INTEGER :: ialloc,i,j,ierr
-    INTEGER,PARAMETER :: nrand_points=100000
     REAL(dp) :: rtemp
     REAL(dp),ALLOCATABLE :: params(:),params_opt(:),params2_opt(:), &
       &err_params_opt(:),props(:),props_opt(:),props2_opt(:),err_props_opt(:)

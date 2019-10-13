@@ -1,0 +1,66 @@
+FITTER_MC,      Neil Drummond,       18/4/2006
+==============================================
+
+This is a general-purpose bootstrap Monte Carlo utility for fitting a
+model to a set of (x,y,err_y) data and obtaining both fitted parameter
+values with error bars and properties expressed in terms of those
+parameters with error bars.  The name of the data file can be
+specified as a command-line argument.  The program works by repeatedly
+resampling the data and fitting the model.  When the data are
+resampled, each y value is replaced by a number drawn from a Gaussian
+distribution whose mean is the supplied y value and whose standard
+deviation is the supplied standard error in y.  The model is fitted to
+each set of resampled data by mininising the chi-squared function.
+The mean and standard error in the mean of the model parameters and
+derived properties are evaluated by averaging over the fits to the
+resampled data.
+
+The program is written in Fortran 2003 and parallelised using OpenMP.
+
+If you wish to change the model, you only need to alter the three
+subroutines in bootstrap.f90 containing the comment
+
+  YOU NEED TO CHANGE THIS SUBROUTINE IF YOU HAVE A NEW MODEL.
+
+To compile, type e.g. "make F90=ifort BUILD=debug OPENMP=no".  By
+default the Fortran compiler is gfortran (F90=gfortran), optimisation
+flags are used (BUILD=opt) and OpenMP is used (OPENMP=yes).
+
+To run, type
+
+   ./fitter_mc datafile.dat
+
+where datafile is a text file holding (x,y,err_y) in three columns.
+
+The program uses the nl2sol (TOMS 573) algorithm to perform the fit of
+the model for each resampled data set.  Specifically it uses nl2sno,
+which does not require the Jacobian matrix (derivatives of residuals
+with respect to parameters).  If you wish to code this up for your
+model then you can introduce a subroutine madj for evaluating the
+Jacobian matrix and replace the call to nl2sno with a call to nl2sol.
+However, in most cases nl2sno works just fine without analytical
+derivatives.
+
+To change the number of samples used for bootstrapping, please alter
+the nrand_points parameter in bootstrap.f90.
+
+As well as nl2sol (TOMS 573), this program uses mrgrnk from ORDERPACK
+for sorting and ranlux for random-number generation.
+
+
+MCFIT,      Neil Drummond,       21/09/2019
+===========================================
+
+For cross-checking purposes, a simple Python script for performing
+bootstrap Monte Carlo fitting called mcfit.py is also included.  This
+program is much shorter and much slower than its Fortran equivalent.
+To insert a new model, again look for the comment
+
+  YOU NEED TO CHANGE THIS SUBROUTINE IF YOU HAVE A NEW MODEL.
+
+To run, type
+
+   ./mcfit.py datafile.dat
+
+If you wish to code up derivatives with respect to parameters, you can
+give the fitting routine a helping hand.

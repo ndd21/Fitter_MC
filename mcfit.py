@@ -30,7 +30,9 @@ make_histogram=True
 
 
 def model_y(x,a,b,alpha):
-    """The model function.  YOU NEED TO CHANGE THIS IF YOU HAVE A NEW MODEL."""
+    """The model function.  This should be an elemental function of x, i.e., if
+    x is an array then the function should return an array of model values.
+    YOU NEED TO CHANGE THIS IF YOU HAVE A NEW MODEL."""
     return a+b*np.exp(-alpha*x)
 
 
