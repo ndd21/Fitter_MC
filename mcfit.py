@@ -20,11 +20,12 @@ usage="Usage: mcfit.py [datafile]"
 paramnames=("a","b","alpha")
 initparams=np.array((0.0,2.0,1.0))
 # Names of derived properties.  Avoid slashes, etc.: it should be
-# possible for these names to be part of filenames.
+# possible for these names to be part of filenames.  If there are no
+# derived properties, then just set propnames equal to ().
 propnames=("a+b",)
 
 # Number of samples for Monte Carlo resampling of data.
-nsamples=100000
+nsamples=2000
 # Create a histogram of each derived property.
 make_histogram=True
 
@@ -39,6 +40,7 @@ def model_y(x,a,b,alpha):
 def derived_props(a,b,alpha):
     """Return an array of parameter-dependent properties to average.
     YOU NEED TO CHANGE THIS IF YOU HAVE A NEW MODEL."""
+    # Just return np.array(()) if there are no derived properties.
     return np.array((a+b,))
 
 
