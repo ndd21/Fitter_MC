@@ -332,9 +332,9 @@ CONTAINS
     ! Work out the standard errors in the fitted parameters.
     ! This is the standard deviation in the fitted parameters.
     IF(nrand_points>1)THEN
-      rtemp=DBLE(nrand_points)/DBLE(nrand_points-1)
-      err_params_opt=SQRT(MAX(params2_opt-params_opt**2*rtemp,0.d0))
-      err_props_opt=SQRT(MAX(props2_opt-props_opt**2*rtemp,0.d0))
+      rtemp=DBLE(nrand_points)/DBLE(nrand_points-1) ! Bessel correction.
+      err_params_opt=SQRT(MAX((params2_opt-params_opt**2)*rtemp,0.d0))
+      err_props_opt=SQRT(MAX((props2_opt-props_opt**2)*rtemp,0.d0))
     ELSE
       err_params_opt=0.d0
       err_props_opt=0.d0
