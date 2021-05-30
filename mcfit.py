@@ -7,11 +7,12 @@
 # insert a new model, parameters or set of derived properties, look
 # for the text "YOU NEED TO CHANGE THIS IF YOU HAVE A NEW MODEL".
 
+from __future__ import absolute_import
+import sys
+import textwrap as tw
 import numpy as np
 import scipy.optimize as optimize
 import scipy.special as special
-import sys
-import textwrap as tw
 
 usage="Usage: mcfit.py [datafile]"
 
@@ -98,7 +99,7 @@ def bootstrapfit(model_y,xx,yy,erryy,initparams,nprops):
         histfiles=[open("histogram_"+p+".dat","w") for p in propnames]
     for i in range(nsamples):
         yyp=np.random.normal(yy,erryy)
-        popt,pcov=optimize.curve_fit(model_y,xx,yyp,sigma=erryy,p0=initparams)
+        popt,_pcov=optimize.curve_fit(model_y,xx,yyp,sigma=erryy,p0=initparams)
         props=derived_props(*popt)
         mcavparams+=popt ; mcavparamssq+=popt**2
         mcavprops+=props ; mcavpropssq+=props**2
@@ -134,7 +135,7 @@ print("\nMCFIT")
 print("=====\n")
 
 # Get filename and read data.
-if sys.argv[1]:
+if len(sys.argv)>1:
     if len(sys.argv)>2:
         errstop("Only one or zero command-line arguments should be present.")
     fname=sys.argv[1]
