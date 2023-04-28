@@ -1,8 +1,8 @@
 MODULE bootstrap
   ! Subroutines for Monte Carlo fitting.  See comments at top of fitter_mc.f90.
   USE machine_constants,ONLY : dp
-  USE utils,ONLY : errstop,wordwrap,i2s,write_mean,isdataline,gammq,&
-    &rang,sort_ranked
+  USE utils,ONLY : uo,ui,errstop,wordwrap,i2s,write_mean,isdataline,gammq,&
+    &sort_ranked
   IMPLICIT NONE
   PRIVATE
   PUBLIC get_data,monte_carlo_fit_data
@@ -37,15 +37,15 @@ CONTAINS
       CALL get_command_ARGUMENT(1,in_file)
     ELSE
       DO
-        WRITE(*,*)'Please enter name of data file.'
-        READ(*,*,iostat=ierr)in_file
+        WRITE(uo,*)'Please enter name of data file.'
+        READ(ui,*,iostat=ierr)in_file
         IF(ierr==0)THEN
           EXIT
         ELSE
-          WRITE(*,*)'Please try again.'
+          WRITE(uo,*)'Please try again.'
         ENDIF ! No error
       ENDDO
-      WRITE(*,*)
+      WRITE(uo,*)
     ENDIF ! Command-line argument supplied.
     in_file=ADJUSTL(in_file)
   END SUBROUTINE get_file
@@ -83,7 +83,7 @@ CONTAINS
         READ(char200,*,iostat=ierr)tempr(1:3)
         IF(ierr/=0)THEN
           CALL wordwrap('File '//TRIM(in_file)//' has the wrong format.')
-          WRITE(*,*)'Data should be in the form x y delta_y, where delta_y &
+          WRITE(uo,*)'Data should be in the form x y delta_y, where delta_y &
             &is the error in y.'
         ENDIF ! ierr/=0
         EXIT
@@ -104,7 +104,7 @@ CONTAINS
 
     REWIND(io)
 
-    WRITE(*,*)'Number of data lines: '//TRIM(i2s(ndata))
+    WRITE(uo,*)'Number of data lines: '//TRIM(i2s(ndata))
 
     ALLOCATE(data_y(ndata),data_x(ndata),rec_errbar_y(ndata),&
       &errbar_y(ndata),stat=ialloc)
@@ -127,13 +127,13 @@ CONTAINS
         i=i+1
         READ(char200,*,iostat=ierr)data_x(i),data_y(i),rec_errbar_y(i)
         IF(ierr/=0)THEN
-          WRITE(*,*)'Problem reading '//TRIM(in_file)//'.'
-          WRITE(*,*)'Problem line: '//TRIM(char200)
+          WRITE(uo,*)'Problem reading '//TRIM(in_file)//'.'
+          WRITE(uo,*)'Problem line: '//TRIM(char200)
           CALL errstop('GET_DATA','Halting.')
         ENDIF ! ierr/=0
         IF(rec_errbar_y(i)<=0.d0)THEN
-          WRITE(*,*)'Found a non-positive error bar.'
-          WRITE(*,*)'Problem line: '//TRIM(char200)
+          WRITE(uo,*)'Found a non-positive error bar.'
+          WRITE(uo,*)'Problem line: '//TRIM(char200)
           CALL errstop('GET_DATA','Halting.')
         ENDIF ! Error bar non-positive
         errbar_y(i)=rec_errbar_y(i)
@@ -144,7 +144,7 @@ CONTAINS
 
     CLOSE(io)
 
-    WRITE(*,*)
+    WRITE(uo,*)
 
     ! Make sure data are in ascending order of x.
     CALL sort_data
@@ -171,8 +171,8 @@ CONTAINS
     ENDDO ! i
     IF(out_of_order)THEN
       IF(.NOT.warning_given_order)THEN
-        WRITE(*,*)'Warning: raw x data are not in ascending order.'
-        WRITE(*,*)
+        WRITE(uo,*)'Warning: raw x data are not in ascending order.'
+        WRITE(uo,*)
         warning_given_order=.TRUE.
       ENDIF ! not warning_given_order
       CALL sort_ranked(ira,data_x)
@@ -183,9 +183,9 @@ CONTAINS
     IF(.NOT.warning_given_equal)THEN
       DO i=2,ndata
         IF(ABS(data_x(i)-data_x(i-1))<tol)THEN
-          WRITE(*,*)'Warning: two x data are equal.'
-          WRITE(*,*)'Value: ',data_x(i)
-          WRITE(*,*)
+          WRITE(uo,*)'Warning: two x data are equal.'
+          WRITE(uo,*)'Value: ',data_x(i)
+          WRITE(uo,*)
           warning_given_equal=.TRUE.
           EXIT
         ENDIF ! Give warning about two equal x data.
@@ -265,9 +265,9 @@ CONTAINS
     ! Get number of parameters and set initial parameter values.
     CALL initialise_model
 
-    WRITE(*,*)'Initial parameter set:'
+    WRITE(uo,*)'Initial parameter set:'
     CALL display_params(params_init)
-    WRITE(*,*)
+    WRITE(uo,*)
 
     !$OMP PARALLEL DEFAULT(none) PRIVATE(ialloc) SHARED(nparam,ndata)
     ALLOCATE(iv(nparam+60),v(93+ndata*(nparam+3)+nparam*(3*nparam+33)/2),&
@@ -290,9 +290,9 @@ CONTAINS
     CALL fit_data(params)     ! Fit parameters to data.
     params_init=params        ! New starting guess.
     CALL derived_properties(params,props)
-    WRITE(*,*)'Fitted parameter set:'
+    WRITE(uo,*)'Fitted parameter set:'
     CALL display_params(params_init,props=props)
-    WRITE(*,*)
+    WRITE(uo,*)
 
     ! Fit the data a large number of times and average the fitted parameter
     ! values.
@@ -340,18 +340,18 @@ CONTAINS
       err_props_opt=0.d0
     ENDIF ! nrand_points>1
 
-    WRITE(*,*)'Monte Carlo fitted parameter set (using ' &
+    WRITE(uo,*)'Monte Carlo fitted parameter set (using ' &
       &//TRIM(i2s(nrand_points))//' random points):'
     CALL display_params(params_opt,err_params_opt,props_opt,err_props_opt)
-    WRITE(*,*)
+    WRITE(uo,*)
 
     IF(make_histogram)THEN
       DO j=1,nprop
         CLOSE(8+j)
-        WRITE(*,*)'  Histogram of '//TRIM(ADJUSTL(prop_name(j))) &
+        WRITE(uo,*)'  Histogram of '//TRIM(ADJUSTL(prop_name(j))) &
           &//' written to histogram_'//TRIM(ADJUSTL(prop_name(j)))//'.dat.'
       ENDDO ! j
-      WRITE(*,*)
+      WRITE(uo,*)
     ENDIF ! make_histogram
 
     ! Deallocate arrays.
@@ -372,9 +372,9 @@ CONTAINS
     INTEGER :: ialloc
     nparam=3 ! Number of parameters in model.
     nprop=1  ! Number of parameter-dependent derived properties to report.
-    WRITE(*,*)'Model used is: test'
-    WRITE(*,'(1x,a,i0)')'Number of parameters: ',nparam
-    WRITE(*,*)
+    WRITE(uo,*)'Model used is: test'
+    WRITE(uo,'(1x,a,i0)')'Number of parameters: ',nparam
+    WRITE(uo,*)
     ALLOCATE(params_init(nparam),param_name(nparam),prop_name(nprop),&
       &stat=ialloc)
     IF(ialloc/=0)CALL errstop('INITIALISE_MODEL',&
@@ -418,34 +418,34 @@ CONTAINS
     IF(PRESENT(err_params))THEN
       DO j=1,nparam
         IF(err_params(j)>0.d0)THEN
-          WRITE(*,*)'  Parameter '//param_name(j)//' = ',params(j),' +/- ', &
+          WRITE(uo,*)'  Parameter '//param_name(j)//' = ',params(j),' +/- ', &
             &err_params(j)
-          WRITE(*,*)'               = ' &
+          WRITE(uo,*)'               = ' &
             &//TRIM(write_mean(params(j),err_params(j)))
         ELSE
-          WRITE(*,*)'Parameter '//param_name(j)//' = ',params(j)
+          WRITE(uo,*)'Parameter '//param_name(j)//' = ',params(j)
         ENDIF ! err_params
       ENDDO ! j
     ELSE
       DO j=1,nparam
-        WRITE(*,*)'  Parameter '//param_name(j)//' = ',params(j)
+        WRITE(uo,*)'  Parameter '//param_name(j)//' = ',params(j)
       ENDDO ! j
     ENDIF ! err_params present
     IF(nprop>0.AND.PRESENT(props))THEN
       IF(PRESENT(err_props))THEN
         DO j=1,nprop
           IF(err_props(j)>0.d0)THEN
-            WRITE(*,*)'  Property  '//prop_name(j)//' = ',props(j),' +/- ', &
+            WRITE(uo,*)'  Property  '//prop_name(j)//' = ',props(j),' +/- ', &
               &err_props(j)
-            WRITE(*,*)'               = ' &
+            WRITE(uo,*)'               = ' &
               &//TRIM(write_mean(props(j),err_props(j)))
           ELSE
-            WRITE(*,*)'Property  '//prop_name(j)//' = ',props(j)
+            WRITE(uo,*)'Property  '//prop_name(j)//' = ',props(j)
           ENDIF ! err_props
         ENDDO ! j
       ELSE
         DO j=1,nprop
-          WRITE(*,*)'  Property  '//prop_name(j)//' = ',props(j)
+          WRITE(uo,*)'  Property  '//prop_name(j)//' = ',props(j)
         ENDDO ! j
       ENDIF ! err_props present
     ENDIF ! nprop>0
@@ -456,8 +456,8 @@ CONTAINS
       chi2=chi2+((data_y(i)-model_y(params,data_x(i)))*rec_errbar_y(i))**2
     ENDDO ! i
     !$OMP END PARALLEL DO
-    WRITE(*,*)'  Reduced chi^2 function = ',chi2/DBLE(ndata-nparam)
-    IF(ndata>nparam)WRITE(*,*)'  Probability chi^2 is this bad = ', &
+    WRITE(uo,*)'  Reduced chi^2 function = ',chi2/DBLE(ndata-nparam)
+    IF(ndata>nparam)WRITE(uo,*)'  Probability chi^2 is this bad = ', &
       &gammq(DBLE(ndata-nparam)*0.5d0,chi2*0.5d0)
   END SUBROUTINE display_params
 

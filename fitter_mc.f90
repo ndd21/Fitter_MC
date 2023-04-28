@@ -14,20 +14,20 @@ PROGRAM fitter_mc
 
   USE bootstrap,ONLY : get_data,monte_carlo_fit_data
   !$ USE omp_lib,ONLY : omp_set_dynamic,omp_set_nested,omp_get_num_threads
-  USE utils,ONLY : initialise_rng
+  USE utils,ONLY : uo,initialise_rng
   IMPLICIT NONE
   !$ INTEGER :: nthreads
 
-  WRITE(*,*)
-  WRITE(*,*)'FITTER_MC'
-  WRITE(*,*)'========='
+  WRITE(uo,*)
+  WRITE(uo,*)'FITTER_MC'
+  WRITE(uo,*)'========='
   !$ CALL omp_set_dynamic(.false.)
   !$ CALL omp_set_nested(.false.)
   !$OMP PARALLEL DEFAULT(none) SHARED(nthreads)
   !$ nthreads=omp_get_num_threads()
   !$OMP END PARALLEL
-  !$ WRITE(*,'(1x,a,i0,a)')'Running in parallel using ',nthreads,' threads.'
-  WRITE(*,*)
+  !$ WRITE(uo,'(1x,a,i0,a)')'Running in parallel using ',nthreads,' threads.'
+  WRITE(uo,*)
 
   CALL initialise_rng
 
@@ -35,7 +35,7 @@ PROGRAM fitter_mc
 
   CALL monte_carlo_fit_data
 
-  WRITE(*,*)'Program finished.'
-  WRITE(*,*)
+  WRITE(uo,*)'Program finished.'
+  WRITE(uo,*)
 
 END PROGRAM fitter_mc

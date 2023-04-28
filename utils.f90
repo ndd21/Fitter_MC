@@ -1,5 +1,6 @@
 MODULE utils
   ! Miscellaneous utilities.
+  USE iso_fortran_env,ONLY : uo=>output_unit,ue=>error_unit,ui=>input_unit
   USE machine_constants,ONLY : dp ! Double-precision type.
   IMPLICIT NONE
   INTEGER,PARAMETER :: luxlevel=3 ! Random "luxury" level.
@@ -15,8 +16,8 @@ MODULE utils
     END SUBROUTINE rluxgo
   END INTERFACE
   PRIVATE
-  PUBLIC errstop,wordwrap,i2s,write_mean,isdataline,gammq,initialise_rng,rang,&
-    &sort_ranked
+  PUBLIC uo,ui,errstop,wordwrap,i2s,write_mean,isdataline,gammq,initialise_rng,&
+   &rang,sort_ranked
 
 
 CONTAINS
@@ -26,11 +27,12 @@ CONTAINS
     ! Report an error and stop.
     IMPLICIT NONE
     CHARACTER(*),INTENT(in) :: sub,message
-    WRITE(0,*)
-    WRITE(0,*)'ERROR in subroutine '//TRIM(ADJUSTL(sub))//'.'
-    WRITE(0,*)
-    CALL wordwrap(TRIM(ADJUSTL(message)),0)
-    WRITE(0,*)
+    WRITE(ue,*)
+    WRITE(ue,*)'ERROR in subroutine '//TRIM(ADJUSTL(sub))//'.'
+    WRITE(ue,*)
+    CALL wordwrap(TRIM(ADJUSTL(message)),ue)
+    WRITE(ue,*)
+    FLUSH(ue)
     STOP 1
   END SUBROUTINE errstop
 
@@ -50,7 +52,7 @@ CONTAINS
     IF(PRESENT(unit_in))THEN
       unit=unit_in
     ELSE
-      unit=6
+      unit=uo
     ENDIF ! unit supplied.
     lentext=LEN_TRIM(text)
     IF(lentext<1)THEN
