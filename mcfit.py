@@ -11,8 +11,8 @@ from __future__ import absolute_import
 import sys
 import textwrap as tw
 import numpy as np
-import scipy.optimize as optimize
-import scipy.special as special
+from scipy import optimize
+from scipy import special
 
 usage="Usage: mcfit.py [datafile]"
 
@@ -97,7 +97,7 @@ def bootstrapfit(model_y,xx,yy,erryy,initparams,nprops):
     mcavprops=np.zeros(nprops) ; mcavpropssq=np.zeros(nprops)
     if make_histogram:
         histfiles=[open("histogram_"+p+".dat","w") for p in propnames]
-    for i in range(nsamples):
+    for _i in range(nsamples):
         yyp=np.random.normal(yy,erryy)
         popt,_pcov=optimize.curve_fit(model_y,xx,yyp,sigma=erryy,p0=initparams)
         props=derived_props(*popt)
