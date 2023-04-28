@@ -28,6 +28,8 @@
 *~.gz
 core
 core.gz
+*.o
+*.o.gz
 *.mod
 *.mod.gz
 gmon.out
@@ -35,3 +37,4 @@ gmon.out.gz
 *__genmod.f90
 *__genmod.f90.gz
 fort.*
+fitter_mc

@@ -28,8 +28,7 @@ SHELL=/bin/sh
 include makedefs.mk
 
 # Check the compiler and build options.
-$(if $(filter-out $(F90LIST),$(F90)), \
-  $(error F90 should be one of: $(F90LIST)))
+$(if $(filter-out $(F90LIST),$(F90)), $(error F90 should be one of: $(F90LIST)))
 $(if $(filter-out $(BUILDLIST),$(BUILD)), \
   $(error BUILD should be one of: $(BUILDLIST)))
 $(if $(filter-out $(OPENMPLIST),$(OPENMP)), \
@@ -78,8 +77,7 @@ utils.o: machine_constants.o ranlux.o
 
 # Rules for linking object files.
 $(BINFILE): $(ALL_OBJFILES)
-	$(F90) $(FFLAGS) $(FFLAGS_OPENMP) -o $@ $(ALL_OBJFILES) \
-	$(LDFLAGS_LIB)
+	$(F90) $(FFLAGS) $(FFLAGS_OPENMP) -o $@ $(ALL_OBJFILES) $(LDFLAGS_LIB)
 
 # Get rid of all results of the make process.
 .PHONY: clean
