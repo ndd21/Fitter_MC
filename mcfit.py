@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # MCFIT    NDD     21/09/2019
 
@@ -7,7 +7,6 @@
 # insert a new model, parameters or set of derived properties, look
 # for the text "YOU NEED TO CHANGE THIS IF YOU HAVE A NEW MODEL".
 
-from __future__ import absolute_import
 import sys
 import textwrap as tw
 import numpy as np
@@ -47,7 +46,7 @@ def derived_props(a,b,alpha):
 
 def errstop(message):
     """Report an error and halt."""
-    print("\n"+usage+"\n")
+    print(f"\n{usage}\n")
     sys.exit(tw.fill(message))
 
 
@@ -61,19 +60,18 @@ def displayparams(paramnames,params,errparams=None):
     namewidth=max(len(p) for p in paramnames)
     if errparams is not None:
         for pn,p,errp in zip(paramnames,params,errparams):
-            print("  {0:>{width}s}: {1:0.15g} +/- {2:0.15g}"
-                  .format(pn,p,errp,width=namewidth))
+            print(f"  {pn:>{namewidth}s}: {p} +/- {errp}")
     else:
         for pn,p in zip(paramnames,params):
-            print("  {0:>{width}s}: {1:0.15g}".format(pn,p,width=namewidth))
-    print("")
+            print(f"  {pn:>{namewidth}s}: {p}")
+    print()
 
 
 def displaychisq(chisq,ndof):
     """Report the reduced chi^2 function."""
-    print("            Reduced chi^2: {0:0.15g}".format(chisq/ndof))
-    print("  Prob. chi^2 is this bad: {0:0.15g}\n"
-          .format(special.gammaincc(0.5*ndof,0.5*chisq)))
+    print(f"            Reduced chi^2: {chisq/ndof}")
+    print(f"  Prob. chi^2 is this bad: {special.gammaincc(0.5*ndof,0.5*chisq)}"
+          "\n")
 
 
 def displayprops(propnames,props,errprops=None):
@@ -82,12 +80,11 @@ def displayprops(propnames,props,errprops=None):
         namewidth=max(len(p) for p in propnames)
         if errprops is not None:
             for pn,p,errp in zip(propnames,props,errprops):
-                print("  {0:>{width}s}: {1:0.15g} +/- {2:0.15g}"
-                      .format(pn,p,errp,width=namewidth))
+                print(f"  {pn:>{namewidth}s}: {p} +/- {errp}")
         else:
             for pn,p in zip(propnames,props):
-                print("  {0:>{width}s}: {1:0.15g}".format(pn,p,width=namewidth))
-        print("")
+                print(f"  {pn:>{namewidth}s}: {p}")
+        print()
 
 
 def bootstrapfit(model_y,xx,yy,erryy,initparams,nprops):
@@ -96,7 +93,7 @@ def bootstrapfit(model_y,xx,yy,erryy,initparams,nprops):
     mcavparamssq=np.zeros(len(initparams))
     mcavprops=np.zeros(nprops) ; mcavpropssq=np.zeros(nprops)
     if make_histogram:
-        histfiles=[open("histogram_"+p+".dat","w") for p in propnames]
+        histfiles=[open(f"histogram_{p}.dat","w") for p in propnames]
     for _i in range(nsamples):
         yyp=np.random.normal(yy,erryy)
         popt,_pcov=optimize.curve_fit(model_y,xx,yyp,sigma=erryy,p0=initparams)
@@ -142,11 +139,11 @@ if len(sys.argv)>1:
 else:
     print("Please enter a filename.")
     fname=sys.stdin.readline()
-print(tw.fill("Reading data from {0:s}.".format(fname)))
+print(tw.fill(f"Reading data from {fname}."))
 try:
     xx,yy,erryy=np.loadtxt(fname,unpack=True)
 except (IOError,ValueError):
-    errstop("Unable to read "+fname+".")
+    errstop(f"Unable to read {fname}.")
 if any(erryy<=0.0): errstop("Error bars should all be strictly positive.")
 
 # Ensure data are in ascending order; warn if not.  Warn about repeated data.
@@ -155,8 +152,8 @@ sortdata(xx,yy,erryy)
 # Sort out number of data points and number of parameters.
 if len(initparams)!=len(paramnames):
     errstop("Initial parameter vector and name vector have different lengths.")
-print("Number of data lines: {0:d}".format(len(xx)))
-print("Number of parameters: {0:d}\n".format(len(initparams)))
+print(f"Number of data lines: {len(xx)}")
+print(f"Number of parameters: {len(initparams)}\n")
 ndof=len(xx)-len(initparams)
 if ndof<0: errstop("Have more parameters than data points.")
 
@@ -173,7 +170,7 @@ displaychisq(chisqfn(model_y,xx,yy,erryy,optparams),ndof)
 displayprops(propnames,optprops)
 
 # Perform bootstrap Monte Carlo fit.
-print("Monte Carlo-averaged parameters (using {0:d} samples):".format(nsamples))
+print(f"Monte Carlo-averaged parameters (using {nsamples} samples):")
 mcavparams,errmcavparams,mcavprop,errmcavprop\
     =bootstrapfit(model_y,xx,yy,erryy,optparams,len(propnames))
 displayparams(paramnames,mcavparams,errmcavparams)
@@ -181,8 +178,7 @@ displaychisq(chisqfn(model_y,xx,yy,erryy,mcavparams),ndof)
 displayprops(propnames,mcavprop,errmcavprop)
 if make_histogram:
     for propname in propnames:
-        print("  Histogram of {0:s} written to histogram_{0:s}.dat."
-              .format(propname))
-    print("")
+        print(f"  Histogram of {propname} written to histogram_{propname}.dat.")
+    print()
 
 print("Program finished.\n")
